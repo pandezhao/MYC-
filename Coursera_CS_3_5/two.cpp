@@ -164,30 +164,20 @@ public:
 //蓝色城堡
 class bluequarter:public quarter{
 string color = "blue";
-int flag = 1; 
+int flag = 2; 
 public:
 	bluequarter(int a,int b,int c,int d,int e,int f):quarter(a,b,c,d,e,f){}
 
 	void shengchan(int time){
 		switch(flag){
-		case 0:
-			if (zhizao_wolf(color,time)){
-				flag = 1;
-				break;}
-			else if(hainengxu()){
-				flag = 1;
-			}
-			else{
-				flag = -1;
-				cout<<setfill('0')<<setw(3)<<time<<" blue headquarter stops making warriors"<<endl;
-				break;		
-			}
 		case 1:
-			if (zhizao_lion(color,time)){
-				flag = 4;
+			if (zhizao_wolf(color,time)){
+				flag = 2;
 				break;}
 			else if(hainengxu()){
-				flag = 4;
+				flag = 2;
+				shengchan(time);
+				break;
 			}
 			else{
 				flag = -1;
@@ -195,11 +185,13 @@ public:
 				break;		
 			}
 		case 2:
-			if (zhizao_iceman(color,time)){
-				flag = 0;
+			if (zhizao_lion(color,time)){
+				flag = 5;
 				break;}
 			else if(hainengxu()){
-				flag = 0;
+				flag = 5;
+				shengchan(time);
+				break;
 			}
 			else{
 				flag = -1;
@@ -207,11 +199,13 @@ public:
 				break;		
 			}
 		case 3:
-			if (zhizao_ninja(color,time)){
-				flag = 2;
+			if (zhizao_iceman(color,time)){
+				flag = 1;
 				break;}
 			else if(hainengxu()){
-				flag = 2;
+				flag = 1;
+				shengchan(time);
+				break;
 			}
 			else{
 				flag = -1;
@@ -219,11 +213,27 @@ public:
 				break;		
 			}
 		case 4:
-			if (zhizao_dragon(color,time)){
+			if (zhizao_ninja(color,time)){
 				flag = 3;
 				break;}
 			else if(hainengxu()){
 				flag = 3;
+				shengchan(time);
+				break;
+			}
+			else{
+				flag = -1;
+				cout<<setfill('0')<<setw(3)<<time<<" blue headquarter stops making warriors"<<endl;
+				break;		
+			}
+		case 5:
+			if (zhizao_dragon(color,time)){
+				flag = 4;
+				break;}
+			else if(hainengxu()){
+				flag = 4;
+				shengchan(time);
+				break;
 			}
 			else{
 				flag = -1;
@@ -242,30 +252,20 @@ public:
 //红色城堡
 class redquarter:public quarter{
 string color = "red";
-int flag = 2;
+int flag = 3;
 public:
 	redquarter(int a,int b,int c,int d,int e,int f):quarter(a,b,c,d,e,f){}
 
 	void shengchan(int time){
 		switch(flag){
-		case 0:
-			if (zhizao_wolf(color,time)){
-				flag = 3;
-				break;}
-			else if(hainengxu()){
-				flag = 3;
-			}
-			else{
-				flag = -1;
-				cout<<setfill('0')<<setw(3)<<time<<" red headquarter stops making warriors"<<endl;
-				break;		
-			}
 		case 1:
-			if (zhizao_lion(color,time)){
-				flag = 0;
+			if (zhizao_wolf(color,time)){
+				flag = 4;
 				break;}
 			else if(hainengxu()){
-				flag = 0;
+				flag = 4;
+				shengchan(time);
+				break;
 			}
 			else{
 				flag = -1;
@@ -273,11 +273,13 @@ public:
 				break;		
 			}
 		case 2:
-			if (zhizao_iceman(color,time)){
+			if (zhizao_lion(color,time)){
 				flag = 1;
 				break;}
 			else if(hainengxu()){
 				flag = 1;
+				shengchan(time);
+				break;
 			}
 			else{
 				flag = -1;
@@ -285,11 +287,13 @@ public:
 				break;		
 			}
 		case 3:
-			if (zhizao_ninja(color,time)){
-				flag = 4;
+			if (zhizao_iceman(color,time)){
+				flag = 2;
 				break;}
 			else if(hainengxu()){
-				flag = 4;
+				flag = 2;
+				shengchan(time);
+				break;
 			}
 			else{
 				flag = -1;
@@ -297,11 +301,27 @@ public:
 				break;		
 			}
 		case 4:
-			if (zhizao_dragon(color,time)){
-				flag = 2;
+			if (zhizao_ninja(color,time)){
+				flag = 5;
 				break;}
 			else if(hainengxu()){
-				flag = 2;
+				flag = 5;
+				shengchan(time);
+				break;
+			}
+			else{
+				flag = -1;
+				cout<<setfill('0')<<setw(3)<<time<<" red headquarter stops making warriors"<<endl;
+				break;		
+			}
+		case 5:
+			if (zhizao_dragon(color,time)){
+				flag = 3;
+				break;}
+			else if(hainengxu()){
+				flag = 3;
+				shengchan(time);
+				break;
 			}
 			else{
 				flag = -1;
@@ -315,10 +335,9 @@ public:
 };
 
 int main(){
-
 	int times;
 	cin>>times;
-	for (int i=1;i<=times;i++){
+	for (int i=0;i<times;i++){
 		int life,a,b,c,d,e;
 		cin>>life>>a>>b>>c>>d>>e;
 		redquarter red(life,a,b,c,d,e);
@@ -326,7 +345,7 @@ int main(){
 		quarter* bluezhen = &blue;
 		quarter* redzhen = &red;
 		int time = 0;
-		cout<<"Case:"<<i<<endl;
+		cout<<"Case:"<<i+1<<endl;
 		while(bluezhen->hainengxu() || redzhen->hainengxu()){
 			red.shengchan(time);
 			blue.shengchan(time);
