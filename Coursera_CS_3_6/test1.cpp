@@ -4,7 +4,6 @@
 #include <iomanip>
 using namespace std;
 
-
 class weapon{
 	public:
 		weapon(){}
@@ -17,6 +16,7 @@ class sword:public weapon(){
 	bool broken;
 	string name="sword";
 	public:
+		friend warrior;
 		sword(int a):weapon(){
 			sword_attack = a;
 			broken = false;
@@ -99,9 +99,10 @@ class warrior{
 		virtual void attack()=0;
 		virtual bool defance()=0;
 		virtual void huanhu()=0;
-		virtual void qingzhen()=0;
+		virtual bool qingzhen()=0; //使用炸弹自爆
 		virtual void fight_back()=0;	
 		virtual string get_name()=0;
+		virtual bool has_weapon()=0;
 		int get_life(){
 			return life;
 		}
@@ -125,7 +126,7 @@ class dragon:public warrior{
 			weapon_one = which_weapon(Index_a, attack_c, ); // 还没解决弓箭的变量的问题 ！！！！！！！！！！
 			one = &weapon_one;
 		}
-		virtual void qingzhen(const warrior* enemy){
+		virtual bool qingzhen(const warrior* enemy){
 			if (one!=NULL&&one->get_name() == "bomb" && enemy.get_attack()>get_life()){
 				enemy->defance(NULL);
 				warrior::life = 0;
@@ -144,12 +145,39 @@ class dragon:public warrior{
 			else{
 			enemy->defance(warrior::get_attack());}
 		}
+		
+		virtual bool shot(warrior* enemy){  // 使用弓箭攻击敌人
+			if (one->get_name=="arrow"){
+				if (enemy -> defance(tmp->weapon_attack())){
+					if (two->times==0){
+						delete two;
+						two == NULL;
+					}
+					return true;
+				}
+				else{
+					if (tmp->times==0){
+						delete tmp;
+						tmp == NULL;
+					}
+					return false;
+				}
+
+			}		
+		}
+
+
 		virtual fight_back(const warrior* enemy){
 			if (warrior::life>0){
 				if(one->get_name() == "sword"){
 					enemy->defance(0.5 * warrior::attack + one->weapon_attack())
 				}else{enemy->defance(0.5 * warrior::attack)}
 			}
+		}
+		virtual bool has_weapon(string tmp){ //拥有指定的武器么？
+			if (one->get_name()==tmp){return true;}
+			else 
+				return false;
 		}
 		virtual bool defance(int damage){
 			if (damage == NULL){
@@ -193,6 +221,11 @@ class ninja:public warrior{
 			}
 			else{return false;}
 		}
+		virtual bool has_weapon(string tmp){ //拥有指定的武器么？
+			if (one->get_name()==tmp || two->get_name()==tmp){return true;}
+			else 
+				return false;
+		}
 		virtual fight_back(const warrior* enemy){
 			if (warrior::life>0){
 				if(one->get_name() == "sword"){
@@ -214,6 +247,43 @@ class ninja:public warrior{
 				enemy->defance(warrior::get_attack());
 			}		
 		}
+
+		virtual bool shot(warrior* enemy){  // 使用弓箭攻击敌人
+			if (one->get_name=="arrow"){
+				if (enemy -> defance(tmp->weapon_attack())){
+					if (two->times==0){
+						delete two;
+						two == NULL;
+					}
+					return true;
+				}
+				else{
+					if (tmp->times==0){
+						delete tmp;
+						tmp == NULL;
+					}
+					return false;
+				}
+
+			}
+			else if (two->get_name=="arrow"){
+				if (enemy -> defance(tmp->weapon_attack())){
+					if (two->times==0){
+						delete two;
+						two == NULL;
+					}
+					return true;
+				}
+				else{
+					if (tmp->times==0){
+						delete tmp;
+						tmp == NULL;
+					}
+					return false;
+				}
+			}			
+		}
+
 		virtual bool defance(int damage){
 			if (damage == NULL){
 				warrior::life = 0;
@@ -251,6 +321,33 @@ class iceman:public warrior{
 				bushu=0;
 			}
 		}
+		virtual bool has_weapon(string tmp){ //拥有指定的武器么？
+			if (one->get_name() == tmp){return true;}
+			else 
+				return false;
+		}
+		
+		virtual bool shot(warrior* enemy){  // 使用弓箭攻击敌人
+			if (one->get_name=="arrow"){
+				if (enemy -> defance(tmp->weapon_attack())){
+					if (two->times==0){
+						delete two;
+						two == NULL;
+					}
+					return true;
+				}
+				else{
+					if (tmp->times==0){
+						delete tmp;
+						tmp == NULL;
+					}
+					return false;
+				}
+
+			}			
+		}
+	
+		
 		virtual fight_back(const warrior* enemy){
 			if (warrior::life>0){
 				if(one->get_name() == "sword"){
@@ -258,7 +355,7 @@ class iceman:public warrior{
 				}else{enemy->defance(0.5 * warrior::attack)}
 			}
 		}
-		virtual void qingzhen(const warrior* enemy){
+		virtual bool qingzhen(const warrior* enemy){
 			if (one!=NULL&&one->get_name() == "bomb" && enemy.get_attack()>get_life()){
 				enemy->defance(NULL);
 				warrior::life = 0;
@@ -309,6 +406,11 @@ class lion:public warrior{
 				enemy->defance(0.5 * warrior::attack);
 			}
 		}
+
+		virtual bool has_weapon(string tmp){ //拥有指定的武器么？
+			return false;
+		}
+
 		virtual bool defance(int damage){
 			if (damage == NULL){
 				warrior::life = 0;
@@ -359,13 +461,27 @@ class wolf:public warrior{
 				}	
 			}
 		}
-		virtual shot(warrior* enemy){
+		virtual bool has_weapon(string tmp){ //拥有指定的武器么？
+			if (one->get_name()==tmp || two->get_name()==tmp){return true;}
+			else 
+				return false;
+		}
+
+		virtual bool shot(warrior* enemy){
 			if (two!=NULL){			
 				if (enemy -> defance(two->weapon_attack())){
-
+					if (two->times==0){
+						delete two;
+						twp == NULL;
+					}
+					return true;
 				}
 				else{
-					
+					if (two->times==0){
+						delete two;
+						twp == NULL;
+					}
+					return false;
 				}				
 			}
 		}
@@ -396,8 +512,8 @@ class city{
 	string flag=NULL;
 	int red_victory=0;
 	int blue_victory=0;
-	warrior* red_warrior;
-	warrior* blue_warrior;
+	warrior* red_warrior=NULL;
+	warrior* blue_warrior=NULL;
 
 	warrior* red_warrior_tmp=NULL;
 	warrior* blue_warrior_tmp=NULL;
@@ -420,15 +536,48 @@ class city{
 		virtual void lion_escape(){
 			if(red_warrior -> get_name() == "lion" && red_warrior -> escape()){
 				delete red_warrior;
+				red_warrior = NULL;
 			}
 		}
-		virtual void warrior_march(){}
+		virtual void warrior_march(){ // 武士位移，位移的部分可能还存在隐形的问题没有解决。尤其是蓝色位移。
+			xia->red_warrior_tmp = red_warrior;
+			red_warrior = red_warrior_tmp;
+			red_warrior_tmp = NULL;
+
+			blue_warrior = xia->blue_warrior;
+		}
 	
 		virtual void arrow_shot(){
-			if ()
+			bool tmp1;
+			bool tmp2;
+			if (red_warrior!=NULL && xia->blue_warrior!=NULL && red_warrior->has_weapon("arrow")){
+				bool tmp1 = red_warrior->shot(xia->blue_warrior);
+			}	
+			if (blue_warrior!=NULL && shang->red_warrior!=NULL && blue_warrior->has_weapon("arrow")){
+				bool tmp2 = blue_warrior->shot(shang->red_warrior);
+			}
+			if (tmp1){ 
+				delete xia->blue_warrior;
+				xia->blue_warrior = NULL;
+			}
+			if (tmp2){
+				delete shang->red_warrior;
+				shang->red_warrior = NULL;
+			}
 		}
 
-		virtual warrior_qingzhen(){}
+		virtual warrior_qingzhen(){
+			bool tmp1;
+			bool tmp2;
+			if (red_warrior!=NULL && red_warrior->has_weapon("bomb")){
+				tmp1 = red_warrior->qingzhen(xia->blue_warrior);
+			}
+			if (blue_warrior!=NULL && blue_warrior->has_weapon("bomb")){
+				tmp2 = blue_warrior->qingzhen(shang->red_warrior);
+			}
+			if (tmp1){}
+			if (tmp2){}
+		}
 
 		virtual warrior_attack(){}
 
