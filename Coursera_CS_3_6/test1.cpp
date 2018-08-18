@@ -3,6 +3,39 @@
 #include <cstdlib>
 #include <iomanip>
 using namespace std;
+
+class time{
+	int shi;
+	public:	
+		int fen;
+		time(){
+			int shi=0;
+			int fen=-5;
+		}
+		int shijian(){
+			fen+=1;
+			if (fen>=60){
+				shi++;
+				fen=0;
+			}
+			//cout<<setfill('0')<<setw(3)<<shi<<':'<<setfill('0')<<setw(2)<<fen<<' ';
+			if (shi==83&&fen==20){
+				return 5000;
+				}
+			return fen;
+		}
+		int zhanshi(){
+			cout<<setfill('0')<<setw(3)<<shi<<':'<<setfill('0')<<setw(2)<<fen<<' ';
+			return fen;
+		}
+		void terminate(string color){
+			fen = 5000;
+			int tmp = zhanshi();
+			cout<<color<<" headquarter was taken"<<endl;
+		}
+};
+time timer;
+
 int R;
 int K;
 class weapon{
@@ -10,7 +43,7 @@ class weapon{
 		weapon(){}
 		virtual weapon_attack()=0;
 		virtual get_name()=0;
-
+		virtual void baogaowuqi_child_child()=0;
 };
 class sword:public weapon(){
 	int sword_attack;
@@ -33,6 +66,9 @@ class sword:public weapon(){
 		virtual string get_name(){
 			return name;
 		}
+		virtual void baogaowuqi_child_child(){
+			cout<<"sword("<<sword_attack<<')';
+		}
 };
 
 class bomb:public weapon(){ //  试试等一下，一会再接着写
@@ -43,6 +79,9 @@ class bomb:public weapon(){ //  试试等一下，一会再接着写
 		}
 		virtual string get_name(){
 			return name;
+		}
+		virtual void baogaowuqi_child_child(){
+			cout<<"bomb";
 		}
 };
 
@@ -64,6 +103,9 @@ class arrow:public weapon(){
 		}
 		virtual string get_name(){
 			return name;
+		}
+		virtual void baogaowuqi_child_child(){
+			cout<<"arrow("<<times<<')';
 		}
 };
 
@@ -117,6 +159,10 @@ class warrior{
 		void warrior_jiaxue(){
 			life+= 8;
 		}
+		int get_index(){
+			return index;
+		}
+		virtual void baogaowuqi_child()=0;
 };
 
 class dragon:public warrior{
@@ -202,6 +248,15 @@ class dragon:public warrior{
 		}
 		virtual string get_name(){
 			return name;
+		}
+		virtual void baogaowuqi_child(){
+			cout<<"dragon "<<warrior::get_index()<<" has ";
+			if (one==NULL){
+				cout<<"no weapon"<<endl;				
+			}else{
+				one->baogaowuqi_child_child();
+				cout<<endl;
+			}
 		}
 };
 
@@ -302,6 +357,43 @@ class ninja:public warrior{
 		virtual string get_name(){
 			return name;
 		}
+		virtual void baogaowuqi_child(){
+			cout<<"ninja "<<warrior::get_index()<<" has ";
+			if (one==NULL&&two==NULL){
+				cout<<"no weapon"<<endl;				
+			}else if(one==NULL&&two!=NULL){
+				two->baogaowuqi_child_child();
+				cout<<endl;
+			}else if(one!=NULL&&two==NULL){
+				two->baogaowuqi_child_child();
+				cout<<endl;
+			}else{
+				if(one->get_name()=="arrow"){
+					one->baogaowuqi_child_child();
+					cout<<endl;
+				}
+				if(two->get_name()=="arrow"){
+					two->baogaowuqi_child_child();
+					cout<<endl;
+				}
+				if(one->get_name()=="bomb"){
+					one->baogaowuqi_child_child();
+					cout<<endl;
+				}
+				if(two->get_name()=="bomb"){
+					two->baogaowuqi_child_child();
+					cout<<endl;
+				}
+				if(one->get_name()=="sword"){
+					one->baogaowuqi_child_child();
+					cout<<endl;
+				}
+				if(two->get_name()=="sword"){
+					two->baogaowuqi_child_child();
+					cout<<endl;
+				}
+			}
+		}
 };
 
 class iceman:public warrior{
@@ -388,6 +480,15 @@ class iceman:public warrior{
 		virtual string get_name(){
 			return name;
 		}
+		virtual void baogaowuqi_child(){
+			cout<<"iceman "<<warrior::get_index()<<" has ";
+			if (one==NULL){
+				cout<<"no weapon"<<endl;				
+			}else{
+				one->baogaowuqi_child_child();
+				cout<<endl;
+			}
+		}
 };
 
 class lion:public warrior{
@@ -431,6 +532,9 @@ class lion:public warrior{
 			if (loyalty<=0){return true;}
 			else
 				return false;
+		}
+		virtual void baogaowuqi_child(){
+			cout<<"lion "<<warrior::get_index()<<" has no weapon"<<endl;
 		}
 };
 
@@ -506,6 +610,43 @@ class wolf:public warrior{
 		virtual string get_name(){
 			return name;
 		}
+		virtual void baogaowuqi_child(){
+			cout<<"wolf "<<warrior::get_index()<<" has ";
+			if (one==NULL&&two==NULL){
+				cout<<"no weapon"<<endl;				
+			}else if(one==NULL&&two!=NULL){
+				two->baogaowuqi_child_child();
+				cout<<endl;
+			}else if(one!=NULL&&two==NULL){
+				two->baogaowuqi_child_child();
+				cout<<endl;
+			}else{
+				if(one->get_name()=="arrow"){
+					one->baogaowuqi_child_child();
+					cout<<endl;
+				}
+				if(two->get_name()=="arrow"){
+					two->baogaowuqi_child_child();
+					cout<<endl;
+				}
+				if(one->get_name()=="bomb"){
+					one->baogaowuqi_child_child();
+					cout<<endl;
+				}
+				if(two->get_name()=="bomb"){
+					two->baogaowuqi_child_child();
+					cout<<endl;
+				}
+				if(one->get_name()=="sword"){
+					one->baogaowuqi_child_child();
+					cout<<endl;
+				}
+				if(two->get_name()=="sword"){
+					two->baogaowuqi_child_child();
+					cout<<endl;
+				}
+			}
+		}
 };
 
 class city{
@@ -546,11 +687,16 @@ class city{
 			}
 		}
 		virtual void warrior_march(){ // 武士位移，位移的部分可能还存在隐形的问题没有解决。尤其是蓝色位移。
-			xia->red_warrior_tmp = red_warrior;
-			red_warrior = red_warrior_tmp;
-			red_warrior_tmp = NULL;
-
-			blue_warrior = xia->blue_warrior;
+			if (red_warrior!=NULL){
+				xia->red_warrior_tmp = red_warrior;
+			}
+			if (red_warrior_tmp!=NULL){		
+				red_warrior = red_warrior_tmp;
+				red_warrior_tmp = NULL;
+			}
+			if (xia->blue_warrior!=NULL){
+				blue_warrior = xia->blue_warrior;
+			}
 		}
 	
 		virtual void arrow_shot(){
@@ -686,32 +832,18 @@ class city{
 
 		virtual void quarter_baogaoxueliang()=0;
 
-		virtual void city_baogaowuqi_red(){
+		void city_baogaowuqi_red(){
 			if(red_warrior!=NULL){
-				if (red_warrior->has_weapon("arrow")){
-
-				}
-				if (red_warrior->has_weapon("bomb")){
-
-				}
-				if (red_warrior->has_weapon("sword")){
-
-				}
+				timer.zhanshi();
+				red_warrior->baogaowuqi_child();
 			}
 		}
-		virtual void city_baogaowuqi_blue(){
+		void city_baogaowuqi_blue(){
 			if(blue_warrior!=NULL){
-				if (blue_warrior->has_weapon("arrow")){
-
-				}
-				if (blue_warrior->has_weapon("bomb")){
-
-				}
-				if (blue_warrior->has_weapon("sword")){
-
-				}
+				timer.zhanshi();
+				blue_warrior->baogaowuqi_child();
 			}
-		}		
+		}
 };
 
 class blue_quarter:public city{
@@ -748,6 +880,24 @@ class blue_quarter:public city{
 			lion_attack=lio_attack;
 			wolf_life=wol_life;
 			wolf_attack=wol_attack;
+		}
+		virtual void warrior_march(){
+			if (city::blue_warrior!=NULL){
+				city::blue_warrior=NULL;
+			}
+			if (city::red_warrior_tmp!=NULL){
+				if(city::red_warrior==NULL){// no stop
+					city::red_warrior=city::red_warrior_tmp;
+					tmp = timer.zhanshi();
+					cout<<" blue "<<city::xia->blue_warrior->get_name()<<' '<<city::xia->blue_warrior->get_index()<<' '<<"reached red headquarter with ";
+					cout<<city::xia->blue_warrior->get_life()<<"elements and force "<<city::xia->blue_warrior->get_attack();
+				}else{//stop
+					tmp = timer.zhanshi();
+					cout<<" red "<<city::shang->red_warrior->get_name()<<' '<<city::shang->red_warrior->get_index()<<' '<<"reached blue headquarter with ";
+					cout<<city::shang->red_warrior->get_life()<<"elements and force "<<city::shang->red_warrior->get_attack();
+					timer.terminate("blue");
+				}
+			}
 		}
 		virtual void produce_warrior(int time){
 			switch(flag){
@@ -846,7 +996,7 @@ class blue_quarter:public city{
 			Index++;
 		}
 		virtual void arrow_shot(){
-
+			
 		}
 		virtual void warrior_qingzhen(){
 
@@ -958,8 +1108,23 @@ class red_quarter:public city{
 					break;
 				}
 			}
-		virtual warrior_march(){ // warrior march part ; add jugde win and lose
-
+		virtual void warrior_march(){ 
+			if (city::red_warrior!=NULL){
+				city::xia->red_warrior_tmp = city::red_warrior;
+			}
+			if (city::xia->blue_warrior!=NULL){
+				if (city::blue_warrior==NULL){
+					city::blue_warrior = city::xia->blue_warrior;
+					tmp = timer.zhanshi();
+					cout<<" blue "<<city::xia->blue_warrior->get_name()<<' '<<city::xia->blue_warrior->get_index()<<' '<<"reached red headquarter with ";
+					cout<<city::xia->blue_warrior->get_life()<<"elements and force "<<city::xia->blue_warrior->get_attack();
+				}else{
+					tmp = timer.zhanshi();
+					cout<<" blue "<<city::xia->blue_warrior->get_name()<<' '<<city::xia->blue_warrior->get_index()<<' '<<"reached red headquarter with ";
+					cout<<city::xia->blue_warrior->get_life()<<"elements and force "<<city::xia->blue_warrior->get_attack();
+					timer.terminate("red");
+				}
+			}
 		}
 		void zhizao_dragon(){
 			float tmp = quarter_life/dragon_life;
@@ -1009,7 +1174,6 @@ class red_quarter:public city{
 class game{
 	city **citys;
 	int counter_city;
-	time timer;
 
 	public:
 		game(int M,int N,int dragon_life,int ninja_life, int iceman_life,int lion_life,int wolf_life,int dragon_attack,int ninja_attack,int iceman_attack,int lion_attack,int wolf_attack){
@@ -1081,7 +1245,8 @@ class game{
 		} //
 		void jiaxue(){
 			for (int i=0;i<counter_city;i++){
-				citys[i]->warrior_jiaxue();
+				citys[i]->warrior_jiaxue_red();
+				citys[counter_city-1-i]->warrior_jiaxue_blue();
 			}
 		} //
 		void shengqi(){
@@ -1089,8 +1254,6 @@ class game{
 				citys[i]->panduan_flag();
 			}
 		} //
-		void laojia(){} //
-		bool zhanlinglaojia(){} //
 		void baogaoxueliang(){
 			for (int i=0;i<counter_city;i++){
 				citys[i]->city_baogaoxueliang();
@@ -1098,7 +1261,10 @@ class game{
 		} //
 		void baogaowuqi(){
 			for (int i=0;i<counter_city;i++){
-				citys[i]->city_baogaowuqi();
+				citys[i]->city_baogaowuqi_red();
+			}
+			for (int i=0;i>counter_city;i++){
+				citys[counter_city-1-i]->city_baogaowuqi_blue()
 			}
 		} //
 		void start(){
@@ -1148,33 +1314,6 @@ class game{
 			}
 		}
 
-};
-
-class time{
-	int shi;
-	public:
-	int fen;
-	public:
-		time(){
-			int shi=0;
-			int fen=-5;
-		}
-		int shijian(){
-			fen+=1;
-			if (fen>=60){
-				shi++;
-				fen=0;
-			}
-			//cout<<setfill('0')<<setw(3)<<shi<<':'<<setfill('0')<<setw(2)<<fen<<' ';
-			if (shi==83&&fen==20){
-				return 5000;
-				}
-			return fen;
-		}
-		int zhanshi(){
-			cout<<setfill('0')<<setw(3)<<shi<<':'<<setfill('0')<<setw(2)<<fen<<' ';
-			return fen;
-		}
 };
 
 int main(){
