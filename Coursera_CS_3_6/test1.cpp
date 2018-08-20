@@ -717,20 +717,24 @@ class city{
 				bool tmp1 = red_warrior->shot(xia->blue_warrior);
 				if (tmp1){ 
 					timer.zhanshi();
-					
+					cout<<"red "<<red_warrior->get_name()<<' '<<red_warrior->warrior::index<<" shot and killed blue "<<xia->blue_warrior->get_name()<<' '<<xia->blue_warrior->warrior::index<<endl;
 					delete xia->blue_warrior;
 					xia->blue_warrior = NULL;
 				}else{
-
+					timer.zhanshi();
+					cout<<"red "<<red_warrior->get_name()<<' '<<red_warrior->warrior::index<<" shot"<<endl;
 				}
 			}	
 			if (blue_warrior!=NULL && shang->red_warrior!=NULL && blue_warrior->has_weapon("arrow")){
 				bool tmp2 = blue_warrior->shot(shang->red_warrior);
 				if (tmp2){
+					timer.zhanshi();
+					cout<<"blue "<<blue_warrior->get_name()<<' '<<blue_warrior->warrior::index<<" shot and killed blue "<<shang->red_warrior->get_name()<<' '<<shang->red_warrior->warrior::index<<endl;
 					delete shang->red_warrior;
 					shang->red_warrior = NULL;
 				}else{
-
+					timer.zhanshi();
+					cout<<"blue "<<blue_warrior->get_name()<<' '<<blue_warrior->warrior::index<<" shot"<<endl;
 				}
 			}
 		}
@@ -744,8 +748,22 @@ class city{
 			if (blue_warrior!=NULL && blue_warrior->has_weapon("bomb")){
 				tmp2 = blue_warrior->qingzhen(red_warrior);
 			}
-			if (tmp1){}
-			if (tmp2){}
+			if (tmp1){
+				timer.zhanshi();
+				cout<<"red "<<red_warrior->get_name()<<' '<<red_warrior->warrior::index<<" used a bomb and killed blue "<<blue_warrior->get_name()<<blue_warrior->warrior::index<<endl;
+				delete red_warrior;
+				delete blue_warrior;
+				red_warrior=NULL;
+				blue_warrior=NULL;
+			}
+			if (!tmp1 && tmp2){
+				timer.zhanshi();
+				cout<<"blue "<<blue_warrior->get_name()<<' '<<blue_warrior->warrior::index<<" used a bomb and killed red "<<red_warrior->get_name()<<red_warrior->warrior::index<<endl;
+				delete red_warrior;
+				delete blue_warrior;
+				red_warrior=NULL;
+				blue_warrior=NULL;
+			}
 		}
 
 		void warrior_attack(){
@@ -1308,7 +1326,7 @@ class game{
 				citys[i]->arrow_shot();
 			}
 		} //
-		void qingzhen(){
+		void game_qingzhen(){
 			for (int i=0;i<counter_city;i++){
 				citys[i]->warrior_qingzhen();
 			}
@@ -1377,7 +1395,7 @@ class game{
 					fangjian();
 				}
 				if (timer.fen==38){
-					qingzhen();
+					game_qingzhen();
 				}
 				if (timer.fen==40){
 					battle();
