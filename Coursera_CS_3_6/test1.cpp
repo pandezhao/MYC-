@@ -666,6 +666,9 @@ class city{
 
 	city* shang=NULL;
 	city* xia=NULL;
+
+	city* red_quarter_city = NULL;
+	city* blue_quarter_city = NULL;
 	public:
 		friend game;
 		city(int Index,int a=0,warrior* r=NULL,warrior* b=NULL){
@@ -680,10 +683,18 @@ class city{
 		void set_xia(city* tmp){
 			xia = tmp;
 		}
-		void lion_escape(){
+		virtual void lion_escape(){
 			if(red_warrior -> get_name() == "lion" && red_warrior -> escape()){
+				timer.zhanshi();
+				cout<<"red lion "<<red_warrior->warrior::index<<" ran away"<<endl;
 				delete red_warrior;
 				red_warrior = NULL;
+			}
+			if(blue_warrior -> get_name() == "lion" && blue_warrior -> escape()){
+				timer.zhanshi();
+				cout<<"blue lion "<<blue_warrior->warrior::index<<" ran away"<<endl;
+				delete blue_warrior;
+				blue_warrior = NULL;
 			}
 		}
 		virtual void warrior_march(){ // 武士位移，位移的部分可能还存在隐形的问题没有解决。尤其是蓝色位移。
@@ -699,26 +710,32 @@ class city{
 			}
 		}
 	
-		virtual void arrow_shot(){
-			bool tmp1;
-			bool tmp2;
+		virtual void arrow_shot(){/// 我写到arrow shot这里了。
+			bool tmp1=false;
+			bool tmp2=false;
 			if (red_warrior!=NULL && xia->blue_warrior!=NULL && red_warrior->has_weapon("arrow")){
 				bool tmp1 = red_warrior->shot(xia->blue_warrior);
+				if (tmp1){ 
+					timer.zhanshi();
+					
+					delete xia->blue_warrior;
+					xia->blue_warrior = NULL;
+				}else{
+
+				}
 			}	
 			if (blue_warrior!=NULL && shang->red_warrior!=NULL && blue_warrior->has_weapon("arrow")){
 				bool tmp2 = blue_warrior->shot(shang->red_warrior);
-			}
-			if (tmp1){ 
-				delete xia->blue_warrior;
-				xia->blue_warrior = NULL;
-			}
-			if (tmp2){
-				delete shang->red_warrior;
-				shang->red_warrior = NULL;
+				if (tmp2){
+					delete shang->red_warrior;
+					shang->red_warrior = NULL;
+				}else{
+
+				}
 			}
 		}
 
-		virtual void warrior_qingzhen(){
+		void warrior_qingzhen(){
 			bool tmp1;
 			bool tmp2;
 			if (red_warrior!=NULL && red_warrior->has_weapon("bomb")){
@@ -731,7 +748,7 @@ class city{
 			if (tmp2){}
 		}
 
-		virtual void warrior_attack(){
+		void warrior_attack(){
 			if (flag!=NULL){
 				if(flag="red"){
 					red_warrior->attack(blue_warrior);
@@ -749,7 +766,7 @@ class city{
 			}
 		}
 
-		virtual void warrior_fanji(){
+		void warrior_fanji(){
 			if (flag!=NULL){
 				if(flag="blue" && red_warrior->warrior::get_life()>0){
 					red_warrior->fight_back(blue_warrior);
@@ -767,7 +784,7 @@ class city{
 			}
 		}
 
-		virtual void warrior_zhansi(){
+		void warrior_zhansi(){
 			if (red_warrior!=NULL && blue_warrior!=NULL){
 				if (red_warrior->warrior::get_life()<=0){
 					delete red_warrior;
@@ -790,18 +807,39 @@ class city{
 			}
 		}
 		virtual void warrior_jiaxue_red(){ // 堡垒加血的部分还没有写出来
-			if (blue_warrior->warrior::get_life()<=0 && red_quarter){
-	
+			if (blue_zhansi && red_quarter_city->life>=8){
+				red_quarter_city->life-=8;
+				red_warrior->warrior::life+=8;
+				blue_zhansi = false;
 			}else{
-
+				blue_zhansi = false;
 			}
 		}
 
-		virtual void warrior_jiaxue_blue(){
-			if (red_warrior->warrior::get_life()<=0 && blue_quarter){
-				
-			}else{}
+		virtual void warrior_jiaxue_blue(){ 
+			if (red_zhansi && blue_quarter_city->life>=8){
+				blue_quarter_city->life-=8;
+				blue_warrior->warrior::life+=8;
+				red_zhansi = false;
+			}else{
+				red_zhansi = false;
+			}
 		}
+
+//*************************************
+		void warrior_jiaxue_chuan_song_gei_jia(){ // 堡垒加血的部分还没有写出来
+			if (life != 0 && red_warrior==NULL && blue_warrior!=NULL){
+				blue_quarter_city->quarter_life += life;
+				life = 0;
+			}else if(life != 0 && red_warrior!=NULL && blue_warrior==NULL){
+				red_quarter_city->quarter_life += life;
+				life = 0;
+			}
+		}
+
+
+//*************************************
+
 		virtual void warrior_huanhu(){
 			if (red_warrior->get_name()=="dragon"){
 				red_warrior->huanhu();
@@ -881,6 +919,15 @@ class blue_quarter:public city{
 			wolf_life=wol_life;
 			wolf_attack=wol_attack;
 		}
+		virtual void lion_escape(){
+			if(city::blue_warrior -> get_name() == "lion" && city::blue_warrior -> escape()){
+				timer.zhanshi();
+				cout<<"blue lion "<<city::blue_warrior->warrior::index<<" ran away"<<endl;
+				delete city::blue_warrior;
+				city::blue_warrior = NULL;
+			}
+		}
+
 		virtual void warrior_march(){
 			if (city::blue_warrior!=NULL){
 				city::blue_warrior=NULL;
@@ -899,7 +946,7 @@ class blue_quarter:public city{
 				}
 			}
 		}
-		virtual void produce_warrior(int time){
+		virtual void produce_warrior(){
 			switch(flag){
 			case 1:
 				if (zhizao_dragon()){
@@ -969,43 +1016,51 @@ class blue_quarter:public city{
 			quarter_life -= dragon_life;
 			dragon A_dragon(Index,dragon_life,dragon_attack,"blue",tmp);
 			city::blue_warrior = &A_dragon;
+			timer.zhanshi();
+			cout<<"blue dragon "<<Index<<" born"<<endl;
+			cout<<"Its morale is "<<setprecision(2)<<fixed<<tmp<<endl;
 			Index++;
 		}
 		void zhizao_ninja(){
 			quarter_life -= ninja_life;
 			ninja A_ninja(Index,ninja_life,ninja_attack,"blue");
 			city::blue_warrior = &A_ninja;
+			timer.zhanshi();
+			cout<<"blue ninja "<<Index<<" born"<<endl;
 			Index++;
 		}
 		void zhizao_iceman(){
 			quarter_life -= iceman_life;
 			iceman A_iceman(Index,iceman_life,iceman_attack,"blue");
 			city::blue_warrior = &A_iceman;
+			timer.zhanshi();
+			cout<<"blue iceman "<<Index<<" born"<<endl;
 			Index++;
 		}
 		void zhizao_lion(){
 			quarter_life -= lion_life;
 			lion A_lion(Index,lion_life,lion_attack,"blue",quarter_life);
 			city::blue_warrior = &A_lion;
+			timer.zhanshi();
+			cout<<"blue lion "<<Index<<" born"<<endl;
+			cout<<"Its loyalty is "<<quarter_life<<endl;
 			Index++;
 		}
 		void zhizao_wolf(){
 			quarter_life -= wolf_life;
 			wolf A_wolf(Index,wolf_life,wolf_attack,"blue");
 			city::blue_warrior = &A_wolf;
+			timer.zhanshi();
+			cout<<"blue wolf "<<Index<<" born"<<endl;
 			Index++;
 		}
-		virtual void arrow_shot(){
-			
-		}
-		virtual void warrior_qingzhen(){
-
-		}
-		virtual void warrior_attack(){
-
-		}
-		virtual void warrior_fanji(){
-
+		bool hainengxu(){
+			if (quarter_life>=dragon_life||quarter_life>=iceman_life||quarter_life>=ninja_life||quarter_life>=lion_life||quarter_life>=wolf_life){
+				return true;		
+			}
+			else{
+				return false;	
+			}
 		}
 }
 
@@ -1028,6 +1083,8 @@ class red_quarter:public city{
 	int wolf_life;
 	int wolf_attack;
 
+	int Index=0;
+
 	public:
 		friend game;
 		red_quarter(int index,int life,int dra_life,int dra_attack,int nin_life,int nin_attack,int ice_life,int ice_attack,int lio_life,int lio_attack,int wol_life,int wol_attack):city(index){
@@ -1044,7 +1101,16 @@ class red_quarter:public city{
 			wolf_attack=wol_attack;
 		}
 
-		virtual void produce_warrior(int time){
+		virtual void lion_escape(){
+			if(city::red_warrior -> get_name() == "lion" && city::red_warrior -> escape()){
+				timer.zhanshi();
+				cout<<"red lion "<<city::red_warrior->warrior::index<<" ran away"<<endl;
+				delete city::red_warrior;
+				city::red_warrior = NULL;
+			}
+		}
+
+		virtual void produce_warrior(){
 			switch(flag){
 			case 1:
 				if (zhizao_dragon()){
@@ -1131,43 +1197,51 @@ class red_quarter:public city{
 			quarter_life -= dragon_life;
 			dragon A_dragon(Index,dragon_life,dragon_attack,"red",tmp);
 			city::red_warrior = &A_dragon;
+			timer.zhanshi();
+			cout<<"red dragon "<<Index<<" born"<<endl;
+			cout<<"Its morale is "<<setprecision(2)<<fixed<<tmp<<endl;
 			Index++;
 		}
 		void zhizao_ninja(){
 			quarter_life -= ninja_life;
 			ninja A_ninja(Index,ninja_life,ninja_attack,"red");
 			city::red_warrior = &A_ninja;
+			timer.zhanshi();
+			cout<<"red ninja "<<Index<<" born"<<endl;
 			Index++;
 		}
 		void zhizao_iceman(){
 			quarter_life -= iceman_life;
 			iceman A_iceman(Index,iceman_life,iceman_attack,"red");
 			city::red_warrior = &A_iceman;
+			timer.zhanshi();
+			cout<<"red iceman "<<Index<<" born"<<endl;
 			Index++;
 		}
 		void zhizao_lion(){
 			quarter_life -= lion_life;
 			lion A_lion(Index,lion_life,lion_attack,"red",quarter_life);
 			city::red_warrior = &A_lion;
+			timer.zhanshi();
+			cout<<"red lion "<<Index<<" born"<<endl;
+			cout<<"Its loyalty is "<<quarter_life<<endl;
 			Index++;
 		}
 		void zhizao_wolf(){
 			quarter_life -= wolf_life;
 			wolf A_wolf(Index,wolf_life,wolf_attack,"red");
 			city::red_warrior = &A_wolf;
+			timer.zhanshi();
+			cout<<"red wolf "<<Index<<" born"<<endl;
 			Index++;
 		}
-		virtual void arrow_shot(){
-
-		}
-		virtual void warrior_qingzhen(){
-
-		}
-		virtual void warrior_attack(){
-
-		}
-		virtual void warrior_fanji(){
-
+		bool hainengxu(){
+			if (quarter_life>=dragon_life||quarter_life>=iceman_life||quarter_life>=ninja_life||quarter_life>=lion_life||quarter_life>=wolf_life){
+				return true;		
+			}
+			else{
+				return false;	
+			}
 		}
 }
 
@@ -1199,19 +1273,25 @@ class game{
 			for (int ii=0;ii<(N+2);ii++){
 				if (ii==0){
 					citys[ii]->city::xia = tmp_citys[ii+1];
+					citys[ii]->city::red_quarter_city = citys[0];
+					citys[ii]->city::blue_quarter_city = citys[N+1];
 				}
 				else if (ii==N+1){
 					citys[ii]->city::shang = tmp_citys[ii-1];
+					citys[ii]->city::red_quarter_city = citys[0];
+					citys[ii]->city::blue_quarter_city = citys[N+1];
 				}
 				else{
 					citys[ii]->shang = tmp_citys[ii-1];
 					citys[ii]->xia = tmp_citys[ii+1];
+					citys[ii]->city::red_quarter_city = citys[0];
+					citys[ii]->city::blue_quarter_city = citys[N+1];
 				}
 			}
 		}
 		void birth(){
-			citys[0]->produce_warrior(time); //这里的time还没有正式赋值
-			citys[counter_city-1]->produce_warrior(time); //这里的time还没有正式赋值
+			citys[0]->produce_warrior();
+			citys[counter_city-1]->produce_warrior(); 
 		} //
 		void escape(){
 			for (int i=0;i<counter_city;i++){
@@ -1244,9 +1324,8 @@ class game{
 			}
 		} //
 		void jiaxue(){
-			for (int i=0;i<counter_city;i++){
-				citys[i]->warrior_jiaxue_red();
-				citys[counter_city-1-i]->warrior_jiaxue_blue();
+			for (int i=1;i<counter_city-1;i++){
+				citys[i]->warrior_jiaxue_chuan_song_gei_jia();
 			}
 		} //
 		void shengqi(){
@@ -1279,7 +1358,7 @@ class game{
 				if (timer.fen==5){
 					escape();
 				}
-				if (timer.fen==10){
+				if (timer.fen==10){ // 这里的逻辑问题可能还没有解决，我回头再来解决这个问题
 					march();
 					laojia();
 					if (zhanlinglaojia()){
@@ -1287,7 +1366,9 @@ class game{
 					};
 				}
 				if (timer.fen==20){
-					for (int ){}
+					for (int i=1;i<counter_city-1;i++){
+						citys[i]->life+=10;
+					}
 				}
 				if (timer.fen==30){
 					jiaxue();
