@@ -10,7 +10,11 @@ class time{
 		int fen;
 		time(){
 			int shi=0;
-			int fen=-5;
+			int fen=-1;
+		}
+		void reset(){
+			shi=0;
+			fen=-1;
 		}
 		int shijian(){
 			fen+=1;
@@ -24,13 +28,12 @@ class time{
 				}
 			return fen;
 		}
-		int zhanshi(){
+		void zhanshi(){
 			cout<<setfill('0')<<setw(3)<<shi<<':'<<setfill('0')<<setw(2)<<fen<<' ';
-			return fen;
 		}
 		void terminate(string color){
-			fen = 5000;
 			int tmp = zhanshi();
+			fen = 5000;
 			cout<<color<<" headquarter was taken"<<endl;
 		}
 };
@@ -167,7 +170,6 @@ class warrior{
 
 class dragon:public warrior{
 	float morale;
-	bool flag=false;
 	weapon* one;
 	string name = "dragon";
 	public:
@@ -187,13 +189,16 @@ class dragon:public warrior{
 		virtual void attack(const warrior* enemy){
 			if (one!=NULL&&one->get_name() == "sword"){
 				if (enemy->defance(warrior::get_attack()+one->weapon_attack())){
-					flag = true;	
 					morale += 0.2;	
 				}
 				else{morale-=0.2;}
 			}
 			else{
-			enemy->defance(warrior::get_attack());}
+				if (enemy->defance(warrior::get_attack())){
+					morale += 0.2;
+				}
+				else{morale-=0.2;}
+			}
 		}
 		
 		virtual bool shot(warrior* enemy){  // 使用弓箭攻击敌人
@@ -240,16 +245,17 @@ class dragon:public warrior{
 				else{return false;}
 			}
 		}
-		virtual void huanhu(){
-			if (flag && morale>0.8){
-			cout<<"huanhu" <<endl;
+		virtual void huanhu(string color, int city_index){
+			if (morale>0.8 && warrior::life >=0){
+				timer.zhanshi();
+				cout<<color<<" dragon "<<warrior::index<<" yelled in city "<<city_index<<endl;
 			}
-			flag = false;
 		}
 		virtual string get_name(){
 			return name;
 		}
 		virtual void baogaowuqi_child(){
+			timer.zhanshi();
 			cout<<"dragon "<<warrior::get_index()<<" has ";
 			if (one==NULL){
 				cout<<"no weapon"<<endl;				
@@ -358,6 +364,7 @@ class ninja:public warrior{
 			return name;
 		}
 		virtual void baogaowuqi_child(){
+			timer.zhanshi();
 			cout<<"ninja "<<warrior::get_index()<<" has ";
 			if (one==NULL&&two==NULL){
 				cout<<"no weapon"<<endl;				
@@ -481,6 +488,7 @@ class iceman:public warrior{
 			return name;
 		}
 		virtual void baogaowuqi_child(){
+			timer.zhanshi();
 			cout<<"iceman "<<warrior::get_index()<<" has ";
 			if (one==NULL){
 				cout<<"no weapon"<<endl;				
@@ -534,6 +542,7 @@ class lion:public warrior{
 				return false;
 		}
 		virtual void baogaowuqi_child(){
+			timer.zhanshi();
 			cout<<"lion "<<warrior::get_index()<<" has no weapon"<<endl;
 		}
 };
@@ -611,6 +620,7 @@ class wolf:public warrior{
 			return name;
 		}
 		virtual void baogaowuqi_child(){
+			timer.zhanshi();
 			cout<<"wolf "<<warrior::get_index()<<" has ";
 			if (one==NULL&&two==NULL){
 				cout<<"no weapon"<<endl;				
@@ -767,37 +777,57 @@ class city{
 		}
 
 		void warrior_attack(){
-			if (flag!=NULL){
-				if(flag="red"){
-					red_warrior->attack(blue_warrior);
-				}else if(flag="blue"){
-					blue_warrior->attack(red_warrior);
-				}
-			}
-			else{
-				if (index%2==1){
-					red_warrior->attack(blue_warrior);
+			if (red_warrior!=NULL && blue_warrior!=NULL){
+				if (flag!=NULL){
+					if(flag="red"){
+						red_warrior->attack(blue_warrior);
+						timer.zhanshi();
+						cout<<"red "<<red_warrior->get_name()<<' '<<red_warrior->get_index()<<" attacked blue "<<blue_warrior->get_name()<<' '<<red_warrior->get_index()<<" in city "<<index<<" with "<<red_warrior->get_life()<<" elements and force "<<red_warrior->get_attack()<<endl;
+					}else if(flag="blue"){
+						blue_warrior->attack(red_warrior);
+						timer.zhanshi();
+						cout<<"blue "<<blue_warrior->get_name()<<' '<<blue_warrior->get_index()<<" attacked red "<<red_warrior->get_name()<<' '<<blue_warrior->get_index()<<" in city "<<index<<" with "<<blue_warrior->get_life()<<" elements and force "<<blue_warrior->get_attack()<<endl;
+					}
 				}
 				else{
-					blue_warrior->attack(red_warrior);
+					if (index%2==1){
+						red_warrior->attack(blue_warrior);
+						timer.zhanshi();
+						cout<<"red "<<red_warrior->get_name()<<' '<<red_warrior->get_index()<<" attacked blue "<<blue_warrior->get_name()<<' '<<red_warrior->get_index()<<" in city "<<index<<" with "<<red_warrior->get_life()<<" elements and force "<<red_warrior->get_attack()<<endl;
+					}
+					else{
+						blue_warrior->attack(red_warrior);
+						timer.zhanshi();
+						cout<<"blue "<<blue_warrior->get_name()<<' '<<blue_warrior->get_index()<<" attacked red "<<red_warrior->get_name()<<' '<<blue_warrior->get_index()<<" in city "<<index<<" with "<<blue_warrior->get_life()<<" elements and force "<<blue_warrior->get_attack()<<endl;
+					}
 				}
 			}
 		}
 
 		void warrior_fanji(){
-			if (flag!=NULL){
-				if(flag="blue" && red_warrior->warrior::get_life()>0){
-					red_warrior->fight_back(blue_warrior);
-				}else if(flag="red" && blue_warrior->warrior::get_life()>0){
-					blue_warrior->fight_back(red_warrior);
+			if (red_warrior!=NULL && blue_warrior!=NULL){
+				if (flag!=NULL){
+					if(flag="blue" && red_warrior->warrior::get_life()>0){
+						red_warrior->fight_back(blue_warrior);
+						timer.zhanshi();
+						cout<<"blue "<<blue_warrior->get_name()<<' '<<blue_warrior->get_index()<<" fought back against red "<<red_warrior->get_name()<<' '<<red_warrior->get_index()<<" in city "<<index<<endl;
+					}else if(flag="red" && blue_warrior->warrior::get_life()>0){
+						blue_warrior->fight_back(red_warrior);
+						timer.zhanshi();
+						cout<<"red "<<red_warrior->get_name()<<' '<<red_warrior->get_index()<<" fought back against blue "<<blue_warrior->get_name()<<' '<<blue_warrior->get_index()<<" in city "<<index<<endl;
+					}
 				}
-			}
-			else{
-				if (index%2==0 && red_warrior->warrior::get_life()>0){
-					red_warrior->fight_back(blue_warrior);
-				}
-				else if (blue_warrior->warrior::get_life()>0){
-					blue_warrior->fight_back(red_warrior);
+				else{
+					if (index%2==0 && red_warrior->warrior::get_life()>0){
+						red_warrior->fight_back(blue_warrior);
+						timer.zhanshi();
+						cout<<"blue "<<blue_warrior->get_name()<<' '<<blue_warrior->get_index()<<" fought back against red "<<red_warrior->get_name()<<' '<<red_warrior->get_index()<<" in city "<<index<<endl;
+					}
+					else if (blue_warrior->warrior::get_life()>0){
+						blue_warrior->fight_back(red_warrior);
+						timer.zhanshi();
+						cout<<"red "<<red_warrior->get_name()<<' '<<red_warrior->get_index()<<" fought back against blue "<<blue_warrior->get_name()<<' '<<blue_warrior->get_index()<<" in city "<<index<<endl;
+					}
 				}
 			}
 		}
@@ -805,6 +835,8 @@ class city{
 		void warrior_zhansi(){
 			if (red_warrior!=NULL && blue_warrior!=NULL){
 				if (red_warrior->warrior::get_life()<=0){
+					timer.zhanshi();
+					cout<<"red "<<red_warrior->get_name()<<' '<<red_warrior->get_index()<<" was killed in city "<<index<<endl;
 					delete red_warrior;
 					red_warrior = NULL;
 					red_zhansi = true;
@@ -814,6 +846,8 @@ class city{
 					red_zhansi = false;
 				}
 				if (blue_warrior->warrior::get_life()<=0){
+					timer.zhanshi();
+					cout<<"blue "<<blue_warrior->get_name()<<' '<<blue_warrior->get_index()<<" was killed in city "<<index<<endl;
 					delete blue_warrior;
 					blue_warrior = NULL;
 					blue_zhansi = true;
@@ -847,9 +881,13 @@ class city{
 //*************************************
 		void warrior_jiaxue_chuan_song_gei_jia(){ // 堡垒加血的部分还没有写出来
 			if (life != 0 && red_warrior==NULL && blue_warrior!=NULL){
+				timer.zhanshi();
+				cout<<"blue "<<blue_warrior->get_name()<<' '<<blue_warrior->get_index()<<" earned "<<life<<" elements for his headquarter"<<endl;
 				blue_quarter_city->quarter_life += life;
 				life = 0;
 			}else if(life != 0 && red_warrior!=NULL && blue_warrior==NULL){
+				timer.zhanshi();
+				cout<<"red "<<red_warrior->get_name()<<' '<<red_warrior->get_index()<<" earned "<<life<<" elements for his headquarter"<<endl;
 				red_quarter_city->quarter_life += life;
 				life = 0;
 			}
@@ -858,21 +896,27 @@ class city{
 
 //*************************************
 
-		virtual void warrior_huanhu(){
-			if (red_warrior->get_name()=="dragon"){
-				red_warrior->huanhu();
-			}
-			if (blue_warrior->get_name()=="dragon"){
-				blue_warrior->huanhu();
+		void warrior_huanhu(){
+			if (red_warrior!=NULL && blue_warrior!=NULL){
+				if (red_warrior->get_name()=="dragon"){
+					red_warrior->huanhu("red", index);
+				}
+				if (blue_warrior->get_name()=="dragon"){
+					blue_warrior->huanhu("blue", index);
+				}
 			}
 		}
 
 		void panduan_flag(){
 			if (flag=NULL){
 				if(red_victory==2){
+					timer.zhanshi();
+					cout<<"blue flag raised in city"<<index<<endl;
 					flag="red";
 					red_victory=0;
 				}else if(blue_victory==2){
+					timer.zhanshi();
+					cout<<"red flag raised in city"<<index<<endl;
 					flag="blue";
 					blue_victory=0;
 				}
@@ -1080,6 +1124,10 @@ class blue_quarter:public city{
 				return false;	
 			}
 		}
+		virtual void quarter_baogaoxueliang(){
+			timer.zhanshi();
+			cout<<quarter_life<<" elements in blue headquarter"<<endl;
+		}
 }
 
 class red_quarter:public city{
@@ -1261,6 +1309,10 @@ class red_quarter:public city{
 				return false;	
 			}
 		}
+		virtual void quarter_baogaoxueliang(){
+			timer.zhanshi();
+			cout<<quarter_life<<" elements in red headquarter"<<endl;
+		}
 }
 
 class game{
@@ -1317,9 +1369,11 @@ class game{
 			}
 		} //
 		void march(){
-			for (int i=0;i<counter_city;i++){
+			for (int i=1;i<counter_city-1;i++){
 				citys[i]->warrior_march();
 			}
+			citys[0]->warrior_march();
+			citys[1]->warrior_march();
 		} //
 		void fangjian(){
 			for (int i=0;i<counter_city;i++){
@@ -1346,21 +1400,26 @@ class game{
 				citys[i]->warrior_jiaxue_chuan_song_gei_jia();
 			}
 		} //
+		void huanhu(){
+			for (int i=1;i<counter_city-1;i++){
+				citys[i]->warrior_huanhu();
+			}
+		}
+
 		void shengqi(){
-			for (int i=0;i<counter_city;i++){
+			for (int i=1;i<counter_city-1;i++){
 				citys[i]->panduan_flag();
 			}
 		} //
 		void baogaoxueliang(){
-			for (int i=0;i<counter_city;i++){
-				citys[i]->city_baogaoxueliang();
-			}
+			citys[0]->quarter_baogaoxueliang();
+			citys[counter_city-1]->quarter_baogaoxueliang();
 		} //
 		void baogaowuqi(){
 			for (int i=0;i<counter_city;i++){
 				citys[i]->city_baogaowuqi_red();
 			}
-			for (int i=0;i>counter_city;i++){
+			for (int i=0;i<counter_city;i++){
 				citys[counter_city-1-i]->city_baogaowuqi_blue()
 			}
 		} //
@@ -1376,12 +1435,8 @@ class game{
 				if (timer.fen==5){
 					escape();
 				}
-				if (timer.fen==10){ // 这里的逻辑问题可能还没有解决，我回头再来解决这个问题
+				if (timer.fen==10){ // 这里的逻辑问题可能还没有解决，我回头再来解决这个
 					march();
-					laojia();
-					if (zhanlinglaojia()){
-						break;
-					};
 				}
 				if (timer.fen==20){
 					for (int i=1;i<counter_city-1;i++){
@@ -1402,13 +1457,14 @@ class game{
 					fanji();
 					killed();
 					huanhu();
+					jiaxue();
 					shengqi();
 				}
 				if (timer.fen==50){
-					baogaoxueliang(){}
+					baogaoxueliang();
 				}
 				if (timer.fen==55){
-					baogaowuqi(){}
+					baogaowuqi();
 				}
 			}
 		}
@@ -1421,11 +1477,17 @@ int main(){
 	int M,N,T;
 	int dragon_life,ninja_life,iceman_life,lion_life,wolf_life;
 	int dragon_attach,ninja_attack,iceman_attack,lion_attack,wolf_attack;
+	game* zhen =NULL;
 	for (int i=0;i<t;i++){
 		cin>>M>>N>>R>>K>>T;
 		cin>>dragon_life>>ninja_life>>iceman_life>>lion_life>>wolf_life;
 		cin>>dragon_attach>>ninja_attack>>iceman_attack>>lion_attack>>wolf_attack;
 		int time=0;
+		game newgame(M,N,dragon_life,ninja_life,iceman_life,lion_life,wolf_life,dragon_attack,ninja_attack,iceman_attack,lion_attack,int wolf_attack,wolf_attack);
+		zhen = &newgame;
+		timer.reset();
+		newgame.start();
+		delete zhen;
 	}
 	return 0;
 }
