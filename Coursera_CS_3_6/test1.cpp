@@ -3,12 +3,11 @@
 #include <cstdlib>
 #include <iomanip>
 using namespace std;
-
-class time{
+class record_time{
 	int shi;
 	public:	
 		int fen;
-		time(){
+		record_time(){
 			int shi=0;
 			int fen=-1;
 		}
@@ -32,31 +31,34 @@ class time{
 			cout<<setfill('0')<<setw(3)<<shi<<':'<<setfill('0')<<setw(2)<<fen<<' ';
 		}
 		void terminate(string color){
-			int tmp = zhanshi();
+			zhanshi();
 			fen = 5000;
 			cout<<color<<" headquarter was taken"<<endl;
 		}
 };
-time timer;
+record_time timer;
 
 int R;
 int K;
 class weapon{
 	public:
 		weapon(){}
-		virtual weapon_attack()=0;
-		virtual get_name()=0;
+		virtual string get_name()=0;
+		virtual int weapon_attack()=0;
 		virtual void baogaowuqi_child_child()=0;
 };
-class sword:public weapon(){
+class sword:public weapon{
 	int sword_attack;
 	bool broken;
 	string name="sword";
 	public:
-		friend warrior;
+		friend class warrior;
+		friend weapon* which_weapon(int Index, int attack);
 		sword(int a):weapon(){
 			sword_attack = a;
-			broken = false;
+			if (a!=0){
+				broken = false;
+			}else{broken=true;}
 		}
 		virtual int weapon_attack(){
 			int tmp = sword_attack;
@@ -74,9 +76,11 @@ class sword:public weapon(){
 		}
 };
 
-class bomb:public weapon(){ //  试试等一下，一会再接着写
+class bomb:public weapon{ //  试试等一下，一会再接着写
 	string name="bomb";
 	public:
+		bomb(){
+		}
 		virtual int weapon_attack(){
 			return 0;
 		}
@@ -88,19 +92,19 @@ class bomb:public weapon(){ //  试试等一下，一会再接着写
 		}
 };
 
-class arrow:public weapon(){
+class arrow:public weapon{
 	int arrow_attack;
 	int times;
 	string name="arrow";
 	public:
-		friend warrior;
+		friend class warrior;
 		arrow():weapon(){
 			arrow_attack = R;
 			times = 3;
 		}
 		virtual int weapon_attack(){
 			if (times!=0){
-				times --
+				times --;
 				return arrow_attack;
 				}
 		}
@@ -112,15 +116,20 @@ class arrow:public weapon(){
 		}
 };
 
-weapon& which_weapon(int Index, int attack, int arrow_attack){
+weapon* which_weapon(int Index, int attack){
 	if (Index % 3 == 0){
-		sword tmp(0.8*attack);
-		return tmp;
+		sword* tmp = new sword (0.8*attack);
+		if (tmp->broken){
+			delete tmp;
+			return NULL;
+		}else{
+			return tmp;
+		}
 	}else if(Index % 3 == 1){
-		bomb tmp();
+		bomb* tmp = new bomb;
 		return tmp;
 	}else if(Index % 3 == 2){
-		arrow tmp(arrow_attack)
+		arrow* tmp = new arrow(R);
 		return tmp;
 	}
 } 
@@ -131,19 +140,19 @@ class warrior{
 	int life;
 	int attack;
 	public:
-		friend dragon;
-		friend ninja;
-		friend iceman;
-		friend lion;
-		friend wolf;
-		friend city;
+		friend class dragon;
+		friend class ninja;
+		friend class iceman;
+		friend class lion;
+		friend class wolf;
+		friend class city;
 		warrior(int a, int b, int c, string d){
 			index = a;
 			life = b;
 			attack = c;
 			string color = d;
 		}
-		virtual void attack()=0;
+		virtual void Attack()=0;
 		virtual bool defance()=0;
 		virtual void huanhu()=0;
 		virtual bool qingzhen()=0; //使用炸弹自爆
@@ -173,25 +182,30 @@ class dragon:public warrior{
 	weapon* one;
 	string name = "dragon";
 	public:
-		friend city;
+		friend class city;
 		dragon(int Index_a,int life_b,int attack_c,string color_d,float e):warrior(Index_a,life_b,attack_c,color_d),morale(e){
-			weapon_one = which_weapon(Index_a, attack_c, ); // 还没解决弓箭的变量的问题 ！！！！！！！！！！
-			one = &weapon_one;
+			one = which_weapon(Index_a, attack_c); // 还没解决弓箭的变量的问题 ！！！！！！！！！！
 		}
 		virtual bool qingzhen(const warrior* enemy){
 			if (one!=NULL&&one->get_name() == "bomb" && enemy.get_attack()>get_life()){
 				enemy->defance(NULL);
 				warrior::life = 0;
+				delete one;
 				return true;
 			}
 			else{return false;}
 		}
-		virtual void attack(const warrior* enemy){
+		virtual void Attack(const warrior* enemy){
 			if (one!=NULL&&one->get_name() == "sword"){
 				if (enemy->defance(warrior::get_attack()+one->weapon_attack())){
 					morale += 0.2;	
 				}
 				else{morale-=0.2;}
+				if (one->broken){
+					delete one;
+					one = NULL;
+				}
+				
 			}
 			else{
 				if (enemy->defance(warrior::get_attack())){
@@ -204,16 +218,16 @@ class dragon:public warrior{
 		virtual bool shot(warrior* enemy){  // 使用弓箭攻击敌人
 			if (one->get_name=="arrow"){
 				if (enemy -> defance(tmp->weapon_attack())){
-					if (two->times==0){
-						delete two;
-						two == NULL;
+					if (one->times==0){
+						delete one;
+						one == NULL;
 					}
 					return true;
 				}
 				else{
-					if (tmp->times==0){
-						delete tmp;
-						tmp == NULL;
+					if (one->times==0){
+						delete one;
+						one == NULL;
 					}
 					return false;
 				}
@@ -221,11 +235,20 @@ class dragon:public warrior{
 			}		
 		}
 
-
-		virtual fight_back(const warrior* enemy){
+		virtual void fight_back(const warrior* enemy){
 			if (warrior::life>0){
-				if(one->get_name() == "sword"){
-					enemy->defance(0.5 * warrior::attack + one->weapon_attack())
+				if(one!=NULL && one->get_name() == "sword"){
+					if (one->broken==false){
+						enemy->defance(0.5 * warrior::attack + one->weapon_attack())
+						if (one->broken){
+							delete one;
+							one = NULL;
+						}
+					}
+					else{
+						delete one;
+						one=NULL;
+					}
 				}else{enemy->defance(0.5 * warrior::attack)}
 			}
 		}
@@ -271,37 +294,35 @@ class ninja:public warrior{
 	weapon* two;
 	string name = "ninja";
 	public:
-		friend city;
+		friend class city;
 		ninja(int Index_a,int life_b,int attack_c,string color_d):warrior(Index_a,life_b,attack_c,color_d){
-			weapon_one = which_weapon(Index_a, attack_c, );
-			weapon_two = which_weapon(Index_a+1, attack_c, );
-			one = &weapon_one;
-			two = &weapon_two;
+			one = which_weapon(Index_a, attack_c);
+			two = which_weapon(Index_a+1, attack_c);
 		}
 		virtual bool qingzhen(const warrior* enemy){
-			if ((one!=NULL||two!=NULL)&&(one->get_name() == "bomb"||two->get_name()=="bomb")&&enemy.get_attack()>get_life()){
+			if ((one!=NULL && one->get_name()=="bomb")||(two!=NULL && two->get_name() == "bomb")&&enemy.get_attack()>warrior::life){
 				enemy->defance(NULL);
 				warrior::life = 0;
 				return true;
 			}
 			else{return false;}
 		}
-		virtual bool has_weapon(string tmp){ //拥有指定的武器么？
+		virtual bool has_weapon(string tmp){ 
 			if (one->get_name()==tmp || two->get_name()==tmp){return true;}
 			else 
 				return false;
 		}
-		virtual fight_back(const warrior* enemy){
+		virtual void fight_back(const warrior* enemy){
 			if (warrior::life>0){
-				if(one->get_name() == "sword"){
+				if(one!=NULL && one->get_name() == "sword" && one->broken==false){
 					enemy->defance(0.5 * warrior::attack + one->weapon_attack())
 				}
-				else if(two->get_name() == "sword"){
+				else if(two!=NULL && two->get_name() == "sword" && two->broken==false){
 					enemy->defance(0.5 * warrior::attack + two->weapon_attack())
 				}else{enemy->defance(0.5 * warrior::attack)}
 			}
 		}
-		virtual void attack(const warrior* enemy){
+		virtual void Attack(const warrior* enemy){  // 写到忍者用剑攻击的部分了
 			if (one!=NULL&&one->get_name()=="sword"){
 				enemy->defance(warrior::get_attack()+one->weapon_attack());
 			}
@@ -313,7 +334,7 @@ class ninja:public warrior{
 			}		
 		}
 
-		virtual bool shot(warrior* enemy){  // 使用弓箭攻击敌人
+		virtual bool shot(warrior* enemy){ 
 			if (one->get_name=="arrow"){
 				if (enemy -> defance(tmp->weapon_attack())){
 					if (two->times==0){
@@ -408,9 +429,9 @@ class iceman:public warrior{
 	int bushu=0;
 	string name = "iceman";
 	public:
-		friend city;
+		friend class city;
 		iceman(int Index_a,int life_b,int attack_c,string color_d):warrior(Index_a,life_b,attack_c,color_d){
-			weapon_one = which_weapon(Index_a, attack_c, );
+			weapon_one = which_weapon(Index_a, attack_c );
 			one = &weapon_one;
 		}
 		virtual void ronghua(){
@@ -466,7 +487,7 @@ class iceman:public warrior{
 			}
 			else{return false;}
 		}
-		virtual void attack(const warrior* enemy){
+		virtual void Attack(const warrior* enemy){
 			if (one!=NULL&&one->get_name() == "sword"){
 				enemy->defance(warrior::get_attack()+one->weapon_attack());
 			}
@@ -503,11 +524,11 @@ class lion:public warrior{
 	int loyalty;
 	string name = "lion";
 	public:
-		friend city;
+		friend class city;
 		lion(int Index_a,int life_b,int attack_c,string color_d, int remain_life):warrior(Index_a,life_b,attack_c,color_d){
 			loyalty = remain_life;
 		}
-		virtual void attack(const warrior* enemy){
+		virtual void Attack(const warrior* enemy){
 			if(enemy->defance(warrior::get_attack())){
 			}
 			else{loyalty-=K;}
@@ -552,10 +573,10 @@ class wolf:public warrior{
 	arrow *	two=NULL;
 	string name = "wolf";
 	public:
-		friend city;
+		friend class city;
 		wolf(int Index_a,int life_b,int attack_c,string color_d):warrior(Index_a,life_b,attack_c,color_d){
 		}
-		virtual void attack(const warrior* enemy){
+		virtual void Attack(const warrior* enemy){
 			if(enemy->defance(warrior::get_attack())){
 				if (enemy.get_name() == "iceman"){
 
@@ -680,7 +701,9 @@ class city{
 	city* red_quarter_city = NULL;
 	city* blue_quarter_city = NULL;
 	public:
-		friend game;
+		friend class game;
+		friend class blue_quarter;
+		friend class red_quarter;
 		city(int Index,int a=0,warrior* r=NULL,warrior* b=NULL){
 			index = Index;			
 			life = a;
@@ -967,7 +990,7 @@ class blue_quarter:public city{
 
 	int Index=1;
 	public:
-		friend game;
+		friend class game;
 		blue_quarter(int index,int life,int dra_life,int dra_attack,int nin_life,int nin_attack,int ice_life,int ice_attack,int lio_life,int lio_attack,int wol_life,int wol_attack):city(index){
 			quarter_life = life;
 			dragon_life=dra_life;
@@ -1005,71 +1028,6 @@ class blue_quarter:public city{
 					cout<<" red "<<city::shang->red_warrior->get_name()<<' '<<city::shang->red_warrior->get_index()<<' '<<"reached blue headquarter with ";
 					cout<<city::shang->red_warrior->get_life()<<"elements and force "<<city::shang->red_warrior->get_attack();
 					timer.terminate("blue");
-				}
-			}
-		}
-		virtual void produce_warrior(){
-			switch(flag){
-			case 1:
-				if (zhizao_dragon()){
-					flag = 2;
-					break;
-				}else if(hainengxu()){
-					flag = 2;
-					produce_warrior();
-					break;
-				}
-				else{
-					break;
-				}
-			case 2:
-				if (zhizao_ninja()){
-					flag = 3;
-					break;
-				}else if(hainengxu()){
-					flag = 3;
-					produce_warrior();
-					break;
-				}
-				else{
-					break;
-				}
-
-			case 3:
-				if (zhizao_iceman()){
-					flag = 5;
-					break;
-				}else if(hainengxu()){
-					flag = 5;
-					produce_warrior();
-					break;
-				}
-				else{
-					break;
-				}
-			case 4:
-				if (zhizao_lion()){
-					flag = 1;
-					break;
-				}else if(hainengxu()){
-					flag = 1;
-					produce_warrior();
-					break;
-				}
-				else{
-					break;
-				}
-			case 5:
-				if (zhizao_wolf()){
-					flag = 4;
-					break;
-				}else if(hainengxu()){
-					flag = 4;
-					produce_warrior();
-					break;
-				}
-				else{
-					break;
 				}
 			}
 		}
@@ -1128,6 +1086,71 @@ class blue_quarter:public city{
 			timer.zhanshi();
 			cout<<quarter_life<<" elements in blue headquarter"<<endl;
 		}
+		virtual void produce_warrior(){
+			switch(flag){
+			case 1:
+				if (zhizao_dragon()){
+					flag = 2;
+					break;
+				}else if(hainengxu()){
+					flag = 2;
+					produce_warrior();
+					break;
+				}
+				else{
+					break;
+				}
+			case 2:
+				if (zhizao_ninja()){
+					flag = 3;
+					break;
+				}else if(hainengxu()){
+					flag = 3;
+					produce_warrior();
+					break;
+				}
+				else{
+					break;
+				}
+
+			case 3:
+				if (zhizao_iceman()){
+					flag = 5;
+					break;
+				}else if(hainengxu()){
+					flag = 5;
+					produce_warrior();
+					break;
+				}
+				else{
+					break;
+				}
+			case 4:
+				if (zhizao_lion()){
+					flag = 1;
+					break;
+				}else if(hainengxu()){
+					flag = 1;
+					produce_warrior();
+					break;
+				}
+				else{
+					break;
+				}
+			case 5:
+				if (zhizao_wolf()){
+					flag = 4;
+					break;
+				}else if(hainengxu()){
+					flag = 4;
+					produce_warrior();
+					break;
+				}
+				else{
+					break;
+				}
+			}
+		}
 }
 
 class red_quarter:public city{
@@ -1152,7 +1175,7 @@ class red_quarter:public city{
 	int Index=0;
 
 	public:
-		friend game;
+		friend class game;
 		red_quarter(int index,int life,int dra_life,int dra_attack,int nin_life,int nin_attack,int ice_life,int ice_attack,int lio_life,int lio_attack,int wol_life,int wol_attack):city(index){
 			quarter_life = life;
 			dragon_life=dra_life;
@@ -1175,71 +1198,6 @@ class red_quarter:public city{
 				city::red_warrior = NULL;
 			}
 		}
-
-		virtual void produce_warrior(){
-			switch(flag){
-			case 1:
-				if (zhizao_dragon()){
-					flag = 3;
-					break;
-				}else if(hainengxu()){
-					flag = 3;
-					produce_warrior();
-					break;
-				}
-				else{
-					break;
-				}
-			case 2:
-				if (zhizao_ninja()){
-					flag = 1;
-					break;
-				}else if(hainengxu()){
-					flag = 1;
-					produce_warrior();
-					break;
-				}
-				else{
-					break;
-				}
-
-			case 3:
-				if (zhizao_iceman()){
-					flag = 4;
-					break;
-				}else if(hainengxu()){
-					flag = 4;
-					produce_warrior();
-					break;
-				}
-				else{
-					break;
-				}
-			case 4:
-				if (zhizao_lion()){
-					flag = 5;
-					break;
-				}else if(hainengxu()){
-					flag = 5;
-					produce_warrior();
-					break;
-				}
-				else{
-					break;
-				}
-			case 5:
-				if (zhizao_wolf()){
-					flag = 2;
-					break;
-				}else if(hainengxu()){
-					flag = 2;
-					produce_warrior();
-					break;
-				}
-				else{
-					break;
-				}
-			}
 		virtual void warrior_march(){ 
 			if (city::red_warrior!=NULL){
 				city::xia->red_warrior_tmp = city::red_warrior;
@@ -1313,6 +1271,70 @@ class red_quarter:public city{
 			timer.zhanshi();
 			cout<<quarter_life<<" elements in red headquarter"<<endl;
 		}
+		virtual void produce_warrior(){
+			switch(flag){
+			case 1:
+				if (zhizao_dragon()){
+					flag = 3;
+					break;
+				}else if(hainengxu()){
+					flag = 3;
+					produce_warrior();
+					break;
+				}
+				else{
+					break;
+				}
+			case 2:
+				if (zhizao_ninja()){
+					flag = 1;
+					break;
+				}else if(hainengxu()){
+					flag = 1;
+					produce_warrior();
+					break;
+				}
+				else{
+					break;
+				}
+
+			case 3:
+				if (zhizao_iceman()){
+					flag = 4;
+					break;
+				}else if(hainengxu()){
+					flag = 4;
+					produce_warrior();
+					break;
+				}
+				else{
+					break;
+				}
+			case 4:
+				if (zhizao_lion()){
+					flag = 5;
+					break;
+				}else if(hainengxu()){
+					flag = 5;
+					produce_warrior();
+					break;
+				}
+				else{
+					break;
+				}
+			case 5:
+				if (zhizao_wolf()){
+					flag = 2;
+					break;
+				}else if(hainengxu()){
+					flag = 2;
+					produce_warrior();
+					break;
+				}
+				else{
+					break;
+				}
+			}
 }
 
 class game{
@@ -1328,32 +1350,32 @@ class game{
 			////
 			for (int ii=0;ii<(N+2);ii++){
 				if (ii==0){
-					red_quarter A_red_quarterint(ii,M,dragon_life,dragon_attack,ninja_life,ninja_attack,iceman_life,iceman_attack,lion_life,lion_attack,wolf_life,wolf_attack)
+					red_quarter A_red_quarterint(ii,M,dragon_life,dragon_attack,ninja_life,ninja_attack,iceman_life,iceman_attack,lion_life,lion_attack,wolf_life,wolf_attack);
 					citys[ii] = &A_red_quarter; // 这里是红魔军
 				}
 				else if (ii==N+1){
-					blue_quarter A_blue_quarter(ii,M,dragon_life,dragon_attack,ninja_life,ninja_attack,iceman_life,iceman_attack,lion_life,lion_attack,wolf_life,wolf_attack)
+					blue_quarter A_blue_quarter(ii,M,dragon_life,dragon_attack,ninja_life,ninja_attack,iceman_life,iceman_attack,lion_life,lion_attack,wolf_life,wolf_attack);
 					citys[ii] = &A_blue_quarter; // 这里是蓝魔军
 				}
 				else{
 					city A_city(ii); // 这里是普通城市
-					citys[ii] = tmp;
+					citys[ii] = &A_city;
 				}
 			}
 			for (int ii=0;ii<(N+2);ii++){
 				if (ii==0){
-					citys[ii]->city::xia = tmp_citys[ii+1];
+					citys[ii]->city::xia = citys[ii+1];
 					citys[ii]->city::red_quarter_city = citys[0];
 					citys[ii]->city::blue_quarter_city = citys[N+1];
 				}
 				else if (ii==N+1){
-					citys[ii]->city::shang = tmp_citys[ii-1];
+					citys[ii]->city::shang = citys[ii-1];
 					citys[ii]->city::red_quarter_city = citys[0];
 					citys[ii]->city::blue_quarter_city = citys[N+1];
 				}
 				else{
-					citys[ii]->shang = tmp_citys[ii-1];
-					citys[ii]->xia = tmp_citys[ii+1];
+					citys[ii]->shang = citys[ii-1];
+					citys[ii]->xia = citys[ii+1];
 					citys[ii]->city::red_quarter_city = citys[0];
 					citys[ii]->city::blue_quarter_city = citys[N+1];
 				}
@@ -1420,9 +1442,14 @@ class game{
 				citys[i]->city_baogaowuqi_red();
 			}
 			for (int i=0;i<counter_city;i++){
-				citys[counter_city-1-i]->city_baogaowuqi_blue()
+				citys[counter_city-1-i]->city_baogaowuqi_blue();
 			}
 		} //
+		void killed(){
+			for (int i=1;i<counter_city-1;i++){
+				citys[i]->warrior_zhansi();
+			}
+		}
 		void start(){
 			bool flag = true;
 			while(flag){
@@ -1483,7 +1510,7 @@ int main(){
 		cin>>dragon_life>>ninja_life>>iceman_life>>lion_life>>wolf_life;
 		cin>>dragon_attach>>ninja_attack>>iceman_attack>>lion_attack>>wolf_attack;
 		int time=0;
-		game newgame(M,N,dragon_life,ninja_life,iceman_life,lion_life,wolf_life,dragon_attack,ninja_attack,iceman_attack,lion_attack,int wolf_attack,wolf_attack);
+		game newgame(M,N,dragon_life,ninja_life,iceman_life,lion_life,wolf_life,dragon_attack,ninja_attack,iceman_attack,lion_attack,wolf_attack);
 		zhen = &newgame;
 		timer.reset();
 		newgame.start();
