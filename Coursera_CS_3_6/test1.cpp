@@ -53,6 +53,7 @@ class sword:public weapon{
 	string name="sword";
 	public:
 		friend class warrior;
+		friend class wolf;
 		friend weapon* which_weapon(int Index, int attack);
 		sword(int a):weapon(){
 			sword_attack = a;
@@ -100,10 +101,15 @@ class arrow:public weapon{
 	string name="arrow";
 	public:
 		friend class warrior;
+		friend class wolf;
 		friend weapon* which_weapon(int Index, int attack);
 		arrow():weapon(){
 			arrow_attack = R;
 			times = 3;
+		}
+		arrow(int number_times):weapon(){
+			arrow_attack = R;
+			times = number_times;
 		}
 		virtual int weapon_attack(){
 			if (times!=0){
@@ -610,28 +616,92 @@ class wolf:public warrior{
 		wolf(int Index_a,int life_b,int attack_c,string color_d):warrior(Index_a,life_b,attack_c,color_d){
 		}
 		virtual void Attack(const warrior* enemy){
-			if(enemy->defance(warrior::get_attack())){
-				if (enemy.get_name() == "iceman"){
-
+			int attack_tmp;
+			if (one!=NULL && one->get_name()=="sword"){
+				attack_tmp = warrior::get_attack() + one->weapon_attack();
+				if (one->broken){
+					delete one;	
+					one = NULL;
 				}
-				else if (enemy.get_name() == "wolf"){
-					if (enemy.one!=NULL && one==NULL){
-						one = enemy.one;
+			}
+			else{attack_tmp = warrior::get_attack();}
+			if(enemy->defance(attack_tmp)){
+				if (enemy->get_name() == "iceman"){
+					if(enemy->one!=NULL){
+						if(enemy->one->get_name()=="sword" && one==NULL){
+							int tmp = enemy->one->sword::sword_attack;
+							one = new sword(tmp);
+							delete enemy->one;
+							enemy->one = NULL;
+						}else if(enemy->one->get_name()=="arrow" && two==NULL){							
+							int tmp = enemy->one->arrow::times;
+							two = new arrow(tmp);
+							delete enemy->one;
+							enemy->one = NULL;
+						}
 					}
-					if (enemy.two!=NULL && two==NULL){
-						two = enemy.two;
+				}
+				else if (enemy->get_name() == "wolf"){
+					if (enemy->one!=NULL && one==NULL){
+						int tmp = enemy->one->sword::sword_attack;
+						one = new sword(tmp);
+						delete enemy->one;
+						enemy->one = NULL;
+					}
+					if (enemy->two!=NULL && two==NULL){
+						int tmp = enemy->two->arrow::times;
+						two = new arrow(tmp);
+						delete enemy->two;
+						enemy->two = NULL;
 					}
 				}
-				else if (enemy.get_name() == "ninja"){
-	
+				else if (enemy->get_name() == "ninja"){
+					if(enemy->one!=NULL){
+						if(enemy->one->get_name()=="sword" && one==NULL){
+							int tmp = enemy->one->sword::sword_attack;
+							one = new sword(tmp);
+							delete enemy->one;
+							enemy->one = NULL;
+						}else if(enemy->one->get_name()=="arrow" && two==NULL){							
+							int tmp = enemy->one->arrow::times;
+							two = new arrow(tmp);
+							delete enemy->one;
+							enemy->one = NULL;
+						}
+					}
+					if(enemy->two!=NULL){
+						if(enemy->two->get_name()=="sword" && one==NULL){
+							int tmp = enemy->two->sword::sword_attack;
+							one = new sword(tmp);
+							delete enemy->two;
+							enemy->two = NULL;
+						}else if(enemy->two->get_name()=="arrow" && two==NULL){							
+							int tmp = enemy->two->arrow::times;
+							two = new arrow(tmp);
+							delete enemy->two;
+							enemy->two = NULL;
+						}
+					}
 				}
-				else if (enemy.get_name() == "dragon"){
-
+				else if (enemy->get_name() == "dragon"){
+					if(enemy->one!=NULL){
+						if(enemy->one->get_name()=="sword" && one==NULL){
+							int tmp = enemy->one->sword::sword_attack;
+							one = new sword(tmp);
+							delete enemy->one;
+							enemy->one = NULL;
+						}else if(enemy->one->get_name()=="arrow" && two==NULL){							
+							int tmp = enemy->one->arrow::times;
+							two = new arrow(tmp);
+							delete enemy->one;
+							enemy->one = NULL;
+						}
+					}
 				}	
 			}
 		}
 		virtual bool has_weapon(string tmp){ //拥有指定的武器么？
-			if (one->get_name()==tmp || two->get_name()==tmp){return true;}
+			if ((one!=NULL &&one->get_name()==tmp) || (two!=NULL && two->get_name()==tmp)){return true;}
 			else 
 				return false;
 		}
@@ -653,8 +723,9 @@ class wolf:public warrior{
 					return false;
 				}				
 			}
+			else{return false;}
 		}
-		virtual fight_back(const warrior* enemy){
+		virtual void fight_back(const warrior* enemy){
 			if (warrior::life>0){
 				enemy->defance(0.5 * warrior::attack);
 			}
@@ -666,7 +737,7 @@ class wolf:public warrior{
 			}
 			else{
 				life -= damage; 
-				if(life<0){return true;}
+				if(life<=0){return true;}
 				else{return false;}
 			}
 		}
@@ -685,30 +756,10 @@ class wolf:public warrior{
 				two->baogaowuqi_child_child();
 				cout<<endl;
 			}else{
-				if(one->get_name()=="arrow"){
-					one->baogaowuqi_child_child();
-					cout<<endl;
-				}
-				if(two->get_name()=="arrow"){
-					two->baogaowuqi_child_child();
-					cout<<endl;
-				}
-				if(one->get_name()=="bomb"){
-					one->baogaowuqi_child_child();
-					cout<<endl;
-				}
-				if(two->get_name()=="bomb"){
-					two->baogaowuqi_child_child();
-					cout<<endl;
-				}
-				if(one->get_name()=="sword"){
-					one->baogaowuqi_child_child();
-					cout<<endl;
-				}
-				if(two->get_name()=="sword"){
-					two->baogaowuqi_child_child();
-					cout<<endl;
-				}
+				two->baogaowuqi_child_child();
+				cout<<',';
+				one->baogaowuqi_child_child();
+				cout<<endl;
 			}
 		}
 };

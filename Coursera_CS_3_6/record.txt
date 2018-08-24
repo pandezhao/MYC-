@@ -1,0 +1,35 @@
+
+weapon：
+1.weapon下的sword 的weapon attack，每调用一次就会降低一次攻击力
+
+
+
+Warrior：
+1. warrior 下的defance函数是bool型的，用来表示是否杀死敌人
+2.当shot函数执行发现warrior手中没有武器时，就会返回false，这个返回值是否正确还需要检验。以及打印时打印的位置需要注意，因为没有shot也会返回false，可以尝试着返回null试试看
+3.感觉fight——back并不需要是一个bool型的函数，即使是void型的函数也可以的。
+4.注意删除warrior的时候要把warrior下面的weapon也全部删除掉
+
+
+	virtual void Attack()=0;
+	virtual bool defance()=0;
+virtual void huanhu()=0;
+virtual bool qingzhen()=0; //使用炸弹自爆 
+	virtual void fight_back()=0;	
+	virtual string get_name()=0;
+	virtual bool has_weapon()=0;
+	virtual bool shot()=0;
+virtual void baogaowuqi_child()=0;
+virtual void ronghua()=0;
+virtual bool escape();
+
+
+city：
+1.需要设定一个删除warrior的机制，应该是在warrior——zhansi那里去删除
+2.雪人在移动的时候，需要调用雪人的ronghua函数。
+3.反击的部分需要打印输出的时候，记得ninja不要打印输出
+4.当shot函数执行发现warrior手中没有武器时，就会返回false，这个返回值是否正确还需要检验。以及打印时打印的位置需要注意，因为没有shot也会返回false，可以尝试着返回null试试看
+5.当wolf杀死敌人的时候，要注意夺取敌人的武器的问题。
+
+
+game：
