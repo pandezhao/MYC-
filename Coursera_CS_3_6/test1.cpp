@@ -43,8 +43,8 @@ int K;
 class weapon{
 	public:
 		weapon(){}
-		virtual string get_name()=0;
 		virtual int weapon_attack()=0;
+		virtual string get_name()=0;
 		virtual void baogaowuqi_child_child()=0;
 };
 class sword:public weapon{
@@ -79,6 +79,8 @@ class sword:public weapon{
 class bomb:public weapon{ //  试试等一下，一会再接着写
 	string name="bomb";
 	public:
+		friend class warrior;
+		friend weapon* which_weapon(int Index, int attack);
 		bomb(){
 		}
 		virtual int weapon_attack(){
@@ -98,6 +100,7 @@ class arrow:public weapon{
 	string name="arrow";
 	public:
 		friend class warrior;
+		friend weapon* which_weapon(int Index, int attack);
 		arrow():weapon(){
 			arrow_attack = R;
 			times = 3;
@@ -118,9 +121,10 @@ class arrow:public weapon{
 
 weapon* which_weapon(int Index, int attack){
 	if (Index % 3 == 0){
-		sword* tmp = new sword (0.8*attack);
+		sword* tmp = new sword(0.8*attack);
 		if (tmp->broken){
 			delete tmp;
+			tmp = NULL;
 			return NULL;
 		}else{
 			return tmp;
@@ -159,6 +163,9 @@ class warrior{
 		virtual void fight_back()=0;	
 		virtual string get_name()=0;
 		virtual bool has_weapon()=0;
+		virtual bool shot()=0;
+		virtual void ronghua()=0;
+		virtual bool escape()=0;
 		int get_life(){
 			return life;
 		}
@@ -187,7 +194,7 @@ class dragon:public warrior{
 			one = which_weapon(Index_a, attack_c); // 还没解决弓箭的变量的问题 ！！！！！！！！！！
 		}
 		virtual bool qingzhen(const warrior* enemy){
-			if (one!=NULL&&one->get_name() == "bomb" && enemy.get_attack()>get_life()){
+			if (one!=NULL&&one->get_name() == "bomb" && enemy.get_attack()>=warrior::get_life()){
 				enemy->defance(NULL);
 				warrior::life = 0;
 				delete one;
@@ -205,7 +212,6 @@ class dragon:public warrior{
 					delete one;
 					one = NULL;
 				}
-				
 			}
 			else{
 				if (enemy->defance(warrior::get_attack())){
@@ -217,7 +223,7 @@ class dragon:public warrior{
 		
 		virtual bool shot(warrior* enemy){  // 使用弓箭攻击敌人
 			if (one->get_name=="arrow"){
-				if (enemy -> defance(tmp->weapon_attack())){
+				if (enemy -> defance(one->weapon_attack())){
 					if (one->times==0){
 						delete one;
 						one == NULL;
@@ -232,28 +238,32 @@ class dragon:public warrior{
 					return false;
 				}
 
-			}		
+			}
+			else{return false;}	
 		}
 
 		virtual void fight_back(const warrior* enemy){
 			if (warrior::life>0){
 				if(one!=NULL && one->get_name() == "sword"){
 					if (one->broken==false){
-						enemy->defance(0.5 * warrior::attack + one->weapon_attack())
+						bool tmp = enemy->defance(0.5 * warrior::attack + one->weapon_attack());
 						if (one->broken){
 							delete one;
 							one = NULL;
 						}
 					}
 					else{
+						bool tmp = enemy->defance(0.5 * warrior::attack);
 						delete one;
 						one=NULL;
 					}
-				}else{enemy->defance(0.5 * warrior::attack)}
+				}else{
+					enemy->defance(0.5 * warrior::attack);
+				}
 			}
 		}
 		virtual bool has_weapon(string tmp){ //拥有指定的武器么？
-			if (one->get_name()==tmp){return true;}
+			if (one!=NULL && one->get_name()==tmp){return true;}
 			else 
 				return false;
 		}
@@ -264,7 +274,7 @@ class dragon:public warrior{
 			}
 			else{
 				life -= damage; 
-				if(life<0){return true;}
+				if(life<=0){return true;}
 				else{return false;}
 			}
 		}
@@ -300,7 +310,7 @@ class ninja:public warrior{
 			two = which_weapon(Index_a+1, attack_c);
 		}
 		virtual bool qingzhen(const warrior* enemy){
-			if ((one!=NULL && one->get_name()=="bomb")||(two!=NULL && two->get_name() == "bomb")&&enemy.get_attack()>warrior::life){
+			if ((one!=NULL && one->get_name()=="bomb")||(two!=NULL && two->get_name() == "bomb")&&enemy.get_attack()>=warrior::life){
 				enemy->defance(NULL);
 				warrior::life = 0;
 				return true;
@@ -308,26 +318,42 @@ class ninja:public warrior{
 			else{return false;}
 		}
 		virtual bool has_weapon(string tmp){ 
-			if (one->get_name()==tmp || two->get_name()==tmp){return true;}
+			if ((one!=NULL && one->get_name()==tmp) || (two!=NULL && two->get_name()==tmp)){return true;}
 			else 
 				return false;
 		}
 		virtual void fight_back(const warrior* enemy){
-			if (warrior::life>0){
-				if(one!=NULL && one->get_name() == "sword" && one->broken==false){
-					enemy->defance(0.5 * warrior::attack + one->weapon_attack())
-				}
-				else if(two!=NULL && two->get_name() == "sword" && two->broken==false){
-					enemy->defance(0.5 * warrior::attack + two->weapon_attack())
-				}else{enemy->defance(0.5 * warrior::attack)}
-			}
+			//if (warrior::life>0){
+			//	if(one!=NULL && one->get_name() == "sword" && one->broken==false){
+			//		enemy->defance(0.5 * warrior::attack + one->weapon_attack());
+			//		if (one->broken==true){
+			//			delete one;
+			//			one = NULL;
+			//		}
+			//	}
+			//	else if(two!=NULL && two->get_name() == "sword" && two->broken==false)
+			//	{	enemy->defance(0.5 * warrior::attack + two->weapon_attack());
+			//		if (two->broken==true){
+			//			delete two;
+			//			two = NULL;
+			//		}
+			//	}else{enemy->defance(0.5 * warrior::attack);}
+			//}
 		}
-		virtual void Attack(const warrior* enemy){  // 写到忍者用剑攻击的部分了
+		virtual void Attack(const warrior* enemy){
 			if (one!=NULL&&one->get_name()=="sword"){
 				enemy->defance(warrior::get_attack()+one->weapon_attack());
+				if (one->broken==true){
+					delete one;
+					one = NULL;
+				}
 			}
 			else if (two!=NULL&&two->get_name()=="sword"){
 				enemy->defance(warrior::get_attack()+two->weapon_attack());
+				if (two->broken==true){
+					delete two;
+					two = NULL;
+				}
 			}
 			else{
 				enemy->defance(warrior::get_attack());
@@ -335,24 +361,24 @@ class ninja:public warrior{
 		}
 
 		virtual bool shot(warrior* enemy){ 
-			if (one->get_name=="arrow"){
-				if (enemy -> defance(tmp->weapon_attack())){
-					if (two->times==0){
-						delete two;
-						two == NULL;
+			if (one != NULL && one->get_name=="arrow"){
+				if (enemy -> defance(one->weapon_attack())){
+					if (one->times==0){
+						delete one;
+						one == NULL;
 					}
 					return true;
 				}
 				else{
-					if (tmp->times==0){
-						delete tmp;
-						tmp == NULL;
+					if (one->times==0){
+						delete one;
+						one == NULL;
 					}
 					return false;
 				}
 
 			}
-			else if (two->get_name=="arrow"){
+			else if (two != NULL && two->get_name=="arrow"){
 				if (enemy -> defance(tmp->weapon_attack())){
 					if (two->times==0){
 						delete two;
@@ -361,13 +387,16 @@ class ninja:public warrior{
 					return true;
 				}
 				else{
-					if (tmp->times==0){
-						delete tmp;
-						tmp == NULL;
+					if (two->times==0){
+						delete two;
+						two == NULL;
 					}
 					return false;
 				}
-			}			
+			}
+			else{
+				return false;
+			}		
 		}
 
 		virtual bool defance(int damage){
@@ -396,28 +425,31 @@ class ninja:public warrior{
 				two->baogaowuqi_child_child();
 				cout<<endl;
 			}else{
-				if(one->get_name()=="arrow"){
-					one->baogaowuqi_child_child();
-					cout<<endl;
+				if(one->get_name()=="arrow"||two->get_name()=="arrow"){
+					if(one->get_name()=="arrow"){
+						one->baogaowuqi_child_child();
+						cout<<',';
+						two->baogaowuqi_child_child();
+						cout<<endl;
+					}
+					else if(two->get_name()=="arrow"){
+						two->baogaowuqi_child_child();
+						cout<<',';
+						one->baogaowuqi_child_child();
+						cout<<endl;
+					}
 				}
-				if(two->get_name()=="arrow"){
-					two->baogaowuqi_child_child();
-					cout<<endl;
-				}
-				if(one->get_name()=="bomb"){
-					one->baogaowuqi_child_child();
-					cout<<endl;
-				}
-				if(two->get_name()=="bomb"){
-					two->baogaowuqi_child_child();
-					cout<<endl;
-				}
-				if(one->get_name()=="sword"){
-					one->baogaowuqi_child_child();
-					cout<<endl;
-				}
-				if(two->get_name()=="sword"){
-					two->baogaowuqi_child_child();
+				else{
+					if(one->get_name()=="bomb"){
+						one->baogaowuqi_child_child();
+						cout<<',';
+						two->baogaowuqi_child_child();
+					}
+					else if(two->get_name()=="bomb"){
+						two->baogaowuqi_child_child();
+						cout<<',';
+						one->baogaowuqi_child_child();
+					}
 					cout<<endl;
 				}
 			}
@@ -431,8 +463,7 @@ class iceman:public warrior{
 	public:
 		friend class city;
 		iceman(int Index_a,int life_b,int attack_c,string color_d):warrior(Index_a,life_b,attack_c,color_d){
-			weapon_one = which_weapon(Index_a, attack_c );
-			one = &weapon_one;
+			one = which_weapon(Index_a, attack_c );
 		}
 		virtual void ronghua(){
 			bushu++;
@@ -446,43 +477,45 @@ class iceman:public warrior{
 			}
 		}
 		virtual bool has_weapon(string tmp){ //拥有指定的武器么？
-			if (one->get_name() == tmp){return true;}
+			if (one!=NULL && one->get_name() == tmp){return true;}
 			else 
 				return false;
 		}
 		
 		virtual bool shot(warrior* enemy){  // 使用弓箭攻击敌人
-			if (one->get_name=="arrow"){
-				if (enemy -> defance(tmp->weapon_attack())){
-					if (two->times==0){
-						delete two;
-						two == NULL;
+			if (one!=NULL && one->get_name=="arrow"){
+				if (enemy -> defance(one->weapon_attack())){
+					if (one->times==0){
+						delete one;
+						one == NULL;
 					}
 					return true;
 				}
 				else{
-					if (tmp->times==0){
-						delete tmp;
-						tmp == NULL;
+					if (one->times==0){
+						delete one;
+						one == NULL;
 					}
 					return false;
 				}
 
-			}			
+			}else{return false;}		
 		}
 	
 		
-		virtual fight_back(const warrior* enemy){
-			if (warrior::life>0){
-				if(one->get_name() == "sword"){
-					enemy->defance(0.5 * warrior::attack + one->weapon_attack())
-				}else{enemy->defance(0.5 * warrior::attack)}
+		virtual void fight_back(const warrior* enemy){
+			if (warrior::life>=0){
+				if(one != NULL && one->get_name() == "sword"){
+					enemy->defance(0.5 * warrior::attack + one->weapon_attack());
+				}else{enemy->defance(0.5 * warrior::attack);}
 			}
 		}
 		virtual bool qingzhen(const warrior* enemy){
-			if (one!=NULL&&one->get_name() == "bomb" && enemy.get_attack()>get_life()){
+			if (one!=NULL&&one->get_name() == "bomb" && enemy->get_attack()>get_life()){
 				enemy->defance(NULL);
 				warrior::life = 0;
+				delete one;
+				one = NULL;
 				return true;
 			}
 			else{return false;}
@@ -501,7 +534,7 @@ class iceman:public warrior{
 			}
 			else{
 				life -= damage; 
-				if(life<0){return true;}
+				if(life<=0){return true;}
 				else{return false;}
 			}
 		}
@@ -533,8 +566,8 @@ class lion:public warrior{
 			}
 			else{loyalty-=K;}
 		}
-		virtual fight_back(const warrior* enemy){
-			if (warrior::life>0){
+		virtual void fight_back(const warrior* enemy){
+			if (warrior::life>=0){
 				enemy->defance(0.5 * warrior::attack);
 			}
 		}
@@ -550,14 +583,14 @@ class lion:public warrior{
 			}
 			else{
 				life -= damage; 
-				if(life<0){return true;}
+				if(life<=0){return true;}
 				else{return false;}
 			}
 		}
 		virtual string get_name(){
 			return name;
 		}
-		bool escape(){
+		virtual bool escape(){
 			if (loyalty<=0){return true;}
 			else
 				return false;
