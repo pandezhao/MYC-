@@ -1,4 +1,9 @@
 
+ 
+    0           0
+ 1  2  3  4  5  6
+
+
 weapon：
 1.weapon下的sword 的weapon attack，每调用一次就会降低一次攻击力
 
